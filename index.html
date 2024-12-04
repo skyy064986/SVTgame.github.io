@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVT EVENT</title>
+    <style>
+        /* ตั้งค่าขอบมนรอบหน้าจอ */
+        html, body {
+            margin: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: url('https://media.discordapp.net/attachments/1260257647815299092/1313794838742958183/6C169A00-6CAF-4B87-AE9B-BDA5AE01B491.jpg?ex=67516e4a&is=67501cca&hm=585be87c5e5d7ff539d78b221cb68ecfa0f857ad50d4a5340936733a20a573ec&=&format=webp&width=1177&height=662') 
+                        no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+
+        #message {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px black; /* เพิ่มขอบตัวอักษรสีดำ */
+            background-color: rgba(255, 255, 255, 0.8); /* สีพื้นหลังโปร่งแสง */
+            border-radius: 15px; /* ขอบมน */
+            padding: 15px; /* ระยะห่างข้อความภายใน */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* เงา */
+            max-width: 600px; /* จำกัดความกว้างข้อความ */
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 1;
+            transition: all 0.3s ease;
+            display: block; /* ทำให้ปุ่มแสดงเป็นบล็อก */
+            margin: 0 auto; /* ทำให้ปุ่มอยู่ตรงกลาง */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+        }
+
+        /* Pop-up ที่แสดงเมื่อกดรับ */
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        /* ช่องคัดลอกสำหรับ 2 ลิงก์ */
+        .link-container {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 20px;
+        }
+
+        .link-container input {
+            width: 40%;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .link-container button {
+            margin-top: 10px;
+        }
+
+        /* Pop-up สำหรับใส่รหัส */
+        #passwordPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(64, 64, 64, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1002;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #passwordInput {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #passwordButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: rgb(0, 0, 0);
+            border: none;
+            cursor: pointer;
+        }
+
+        #footer {
+            font-size: 12px;
+            text-align: center;
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 0;
+        }
+
+        #backButton {
+            padding: 10px 20px;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #closePasswordPopup {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="message">กดปุ่มเพื่อรับลิงก์!</div>
+    <button id="receiveButton">กดรับ</button>
+    <div id="notification"></div>
+
+    <!-- Pop-up สำหรับใส่รหัส -->
+    <div id="passwordPopup">
+        <p>กรุณาใส่รหัสลับเพื่อเข้าถึงลิงก์</p>
+        <input type="password" id="passwordInput" placeholder="กรอกรหัสลับที่นี่">
+        <button id="passwordButton">ยืนยัน</button>
+        <button id="closePasswordPopup">ยกเลิก</button> <!-- ปุ่มยกเลิก -->
+    </div>
+
+    <!-- Pop-up สำหรับแสดงลิงก์และปุ่มคัดลอก -->
+    <div id="popup">
+        <p>คุณสามารถเข้าถึงลิงก์ได้แล้ว!</p>
+        <div id="linkContainer" class="link-container">
+            <!-- ช่องแสดงลิงก์ -->
+            <input type="text" id="linkInput1" value="" readonly>
+            <input type="text" id="linkInput2" value="" readonly>
+        </div>
+        <div>
+            <button id="copyButton1">คัดลอกลิงก์ 1</button>
+            <button id="copyButton2">คัดลอกลิงก์ 2</button>
+        </div>
+        <button id="closePopup">ปิด</button>
+        <button id="backButton">กลับไปที่หน้ากรอกข้อมูล</button>
+    </div>
+
+    <!-- ไตเติ้ลที่ด้านล่างสุด -->
+    <div id="footer">© BY SVTSS4</div>
+
+    <script>
+        // รายการลิงก์ทั้งหมด 32 ลิงก์
+        const links = [
+            "https://drive.google.com/file/d/1CWmVr-_kuynKbP0nSMBHBpHNw3pK2Iwk/view?usp=drive_link", "https://drive.google.com/file/d/1pdt9GN2kruGopKOuqcl-7uJP1_TwtHlb/view?usp=drive_link", "https://drive.google.com/file/d/15-ntoz8eWQb84ARGTT6bZFRBqafrOayw/view?usp=drive_link", "https://drive.google.com/file/d/1ibuTdR-XduRh14vRJbk3U_2rwdCfE-C8/view?usp=drive_link", "https://drive.google.com/file/d/1MQnFmoSr-3uLSaC4IxB5HoEzDcSIKak6/view?usp=drive_link",
+            "https://drive.google.com/file/d/1L0ACTh7WLvJyrSsjd9OIlH8RpEK76MDo/view?usp=drive_link", "https://drive.google.com/file/d/1zsrcdXXV7TQDJhLK6XzG52dpR8ZYiUeQ/view?usp=drive_link", "https://drive.google.com/file/d/15IH8z8JbdRam-EUEa0Oa3bZzeuDGHleU/view?usp=drive_link", "https://drive.google.com/file/d/1MGJKzSe7VVnwXapdnZ0emg1QzPUD2KPa/view?usp=drive_link", "https://drive.google.com/file/d/1PY85CNmIeif07mXQiMYvLAJJTGM85qK4/view?usp=drive_link",
+            "https://drive.google.com/file/d/1JR72-THAV-rA_yT_hzinxM-a9h4D7_Bc/view?usp=drive_link", "https://drive.google.com/file/d/16Oe_RF0z9LvT-YzbhZW4xd8TAVuQhiKw/view?usp=drive_link", "https://drive.google.com/file/d/1vAyMLTC6ffBV5AoFeObZYEr2G1Up-E_A/view?usp=drive_link", "https://drive.google.com/file/d/1OVXJtJZF3hvl9fRxK_4i75lwtf1rS5Mp/view?usp=drive_link", "https://drive.google.com/file/d/1eHEj2PrLSj-hX8-MpLxxUbnSQ7_hUB6r/view?usp=drive_link",
+            "https://drive.google.com/file/d/1eVO_XnZV8xPoTEeJMY8vU5YTGjNUqp1f/view?usp=drive_link", "https://drive.google.com/file/d/17xMyKoyUYoNuAf-av5n2AJPAZw7SxzGL/view?usp=drive_link", "https://drive.google.com/file/d/1CvXTbO1A465k-3vhXSe3f3qVdgnp3V4z/view?usp=drive_link", "https://drive.google.com/file/d/1gN8dHkQtat2MEZ3fOmxbIICOTmmm7RWS/view?usp=drive_link", "https://drive.google.com/file/d/1LOCejsMFldadxQLWAzH_0rQ0OlbpnXve/view?usp=drive_link",
+            "https://drive.google.com/file/d/1aKNF47SDGW2NNDw0rym9HtZp6ljvbJME/view?usp=drive_link", "https://drive.google.com/file/d/1lIXv75Yu6Ybb8Dh0aDnoQUN_l4XKMdSV/view?usp=drive_link", "https://drive.google.com/file/d/15uGCeeDUwhACAKStvOEk2V9uwNrcNb2f/view?usp=drive_link", "https://drive.google.com/file/d/15RAxyTlRAGoT8rkFhh1X3oOZGjjTRm6-/view?usp=drive_link", "https://drive.google.com/file/d/1YyfnAlTQUYMFPiElDEo2EOSzud1Y8FJB/view?usp=drive_link",
+            "https://drive.google.com/file/d/1DFLJWl3i0qOjKrpLdHopXwQMq59w1qqC/view?usp=drive_link", "https://drive.google.com/file/d/1Oy2YM9xtG4R2Kg-ORHG-RhcjOnSe3M7w/view?usp=drive_link", "https://drive.google.com/file/d/1zxNP-QhQjE5Q_NfNNnb3B1Axv-kW2jw_/view?usp=drive_link", "https://drive.google.com/file/d/162msOsxfl9x8IQJYj55qXxHOdL-DCgap/view?usp=drive_link", "https://drive.google.com/file/d/1P_i6LLewzez-1Fb1F0F_Sy2MLN2OAYfh/view?usp=drive_link",
+            "https://drive.google.com/file/d/1ijoaHmx7n1OocJZ40EYDp9J64yL5rAhG/view?usp=drive_link", "https://drive.google.com/file/d/1dAjUQgxiJPNuOgIwerGRm_-7_5MdY_BM/view?usp=drive_link"
+        ];
+
+        const button = document.getElementById('receiveButton');
+        const popup = document.getElementById('popup');
+        const copyButton1 = document.getElementById('copyButton1');
+        const copyButton2 = document.getElementById('copyButton2');
+        const closePopup = document.getElementById('closePopup');
+        const passwordPopup = document.getElementById('passwordPopup');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordButton = document.getElementById('passwordButton');
+        const backButton = document.getElementById('backButton');
+        const linkInput1 = document.getElementById('linkInput1');
+        const linkInput2 = document.getElementById('linkInput2');
+        const notification = document.getElementById('notification');
+
+        const correctPassword = "Everyone in the project is gay"; // รหัสลับที่ถูกต้อง
+
+        // ฟังก์ชันแสดงข้อความแจ้งเตือน
+        function showNotification(text) {
+            notification.textContent = text;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // ฟังก์ชันคำนวณลิงก์สำหรับวันนี้
+        function getLinkForToday() {
+            const today = new Date();
+            const startDate = new Date(2024, 11, 4); // วันที่เริ่มต้น (4 ธันวาคม 2024)
+            const diffInTime = today - startDate;
+            const dayOfYear = Math.floor(diffInTime / (1000 * 3600 * 24)); // คำนวณวันที่ในปี
+
+            const linkIndex = dayOfYear % links.length;
+            const linkForToday = [links[linkIndex], links[(linkIndex + 1) % links.length]];
+            return linkForToday;
+        }
+
+        // ฟังก์ชันตรวจสอบเวลา
+        function isInTimeRange() {
+            const now = new Date();
+            const hours = now.getHours();
+            return hours >= 19 && hours < 24; // ตรวจสอบว่าเวลาตอนนี้อยู่ระหว่าง 19:00 - 00:00
+        }
+
+        // เมื่อกดรับ
+        button.addEventListener('click', () => {
+            if (!isInTimeRange()) {
+                showNotification("ไม่สามารถกดได้ในเวลานี้ กรุณารอจนกว่าจะถึงเวลา 19:00 น.");
+                return;
+            }
+            passwordPopup.style.display = 'block'; // แสดง Pop-up ใส่รหัส
+        });
+
+        // ตรวจสอบรหัส
+        passwordButton.addEventListener('click', () => {
+            if (passwordInput.value === correctPassword) {
+                passwordPopup.style.display = 'none'; // ปิด Pop-up ใส่รหัส
+                const linksForToday = getLinkForToday();
+                linkInput1.value = linksForToday[0];
+                linkInput2.value = linksForToday[1] || ''; // ถ้าไม่มีลิงก์ที่ 2 ให้ใส่ค่าว่าง
+                popup.style.display = 'block'; // แสดง Pop-up สำหรับลิงก์
+            } else {
+                showNotification("รหัสไม่ถูกต้อง กรุณาลองใหม่");
+            }
+        });
+
+        // คัดลอกลิงก์
+        copyButton1.addEventListener('click', () => {
+            linkInput1.select();
+            document.execCommand('copy');
+            showNotification("คัดลอกลิงก์ 1 เรียบร้อย!");
+        });
+
+        copyButton2.addEventListener('click', () => {
+            linkInput2.select();
+            document.execCommand('copy');
+            showNotification("คัดลอกลิงก์ 2 เรียบร้อย!");
+        });
+
+        // ปิด Pop-up
+        closePopup.addEventListener('click', () => {
+            popup.style.display = 'none';
+        });
+
+        // ปุ่มย้อนกลับไปหน้าหลัก
+        backButton.addEventListener('click', () => {
+            popup.style.display = 'none';
+            passwordPopup.style.display = 'block';
+        });
+
+        // ปิด Pop-up ใส่รหัส (ลบ)
+        document.getElementById('closePasswordPopup').addEventListener('click', () => {
+            passwordPopup.style.display = 'none'; // ปิด Pop-up ใส่รหัส
+            document.getElementById('message').textContent = "กรุณากดปุ่มเพื่อรับลิงก์"; // กลับไปหน้าเดิม
+        });
+    </script>
+</body>
+</html>
