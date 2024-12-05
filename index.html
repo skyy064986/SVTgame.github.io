@@ -230,16 +230,17 @@
             }, 3000);
         }
 
-        // ฟังก์ชันคำนวณลิงก์สำหรับวันนี้
-        function getLinkForToday() {
-            const today = new Date();
-            const startDate = new Date(2024, 11, 4); // วันที่เริ่มต้น (4 ธันวาคม 2024)
-            const diffInTime = today - startDate;
-            const dayOfYear = Math.floor(diffInTime / (1000 * 3600 * 24)); // คำนวณวันที่ในปี
+// ฟังก์ชันคำนวณลิงก์สำหรับวันนี้ (เลื่อนทีละ 2 ลิงก์)
+function getLinkForToday() {
+    const today = new Date();
+    const startDate = new Date(2024, 11, 4); // วันที่เริ่มต้น (4 ธันวาคม 2024)
+    const diffInTime = today - startDate;
+    const dayOfYear = Math.floor(diffInTime / (1000 * 3600 * 24)); // คำนวณวันที่ในปี
 
-            const linkIndex = dayOfYear % links.length;
-            const linkForToday = [links[linkIndex], links[(linkIndex + 1) % links.length]];
-            return linkForToday;
+    const linkIndex = (dayOfYear * 2) % links.length; // คำนวณลำดับของลิงก์ เลื่อนทีละ 2 ต่อวัน
+    const linkForToday = [links[linkIndex], links[(linkIndex + 1) % links.length]]; // ลิงก์ 2 ลำดับต่อวัน
+    return linkForToday;
+
         }
 
         // ฟังก์ชันตรวจสอบเวลา
@@ -303,3 +304,4 @@
     </script>
 </body>
 </html>
+
